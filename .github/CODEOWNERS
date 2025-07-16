@@ -1,6 +1,6 @@
-# Code owners for staging branch
-# .github folder is managed by bikaze and muhirwaJD
-/.github/ @bikaze @muhirwaJD
+# Code owners for talentradar-qa-rw
+# Global owners for all files (except .github/)
+*  @sntakirutimana72
 
-# Everything else is managed by sntakirutimana72
-* @sntakirutimana72
+# GitHub folder specific owners
+.github/ @bikaze @muhirwaJD
