@@ -1,1 +1,1 @@
-# talentradar-qa-rw
+# talentradar-qa-rwanda
