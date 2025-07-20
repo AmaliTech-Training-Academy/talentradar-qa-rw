@@ -14,6 +14,8 @@
           <option value="talentradar-qa-rw" />
           <option value="talentradar-qa-rw" />
           <option value="talentradar-qa-rw" />
+          <option value="talentradar" />
+          <option value="talentradar" />
         </list>
       </option>
       <option name="ignoredPackages">
@@ -24,6 +26,8 @@
           <option value="commons-codec:commons-codec:1.11" />
           <option value="org.apache.commons:commons-lang3:3.11" />
           <option value="org.apache.commons:commons-lang3:3.14.0" />
+          <option value="commons-codec:commons-codec:1.11" />
+          <option value="org.apache.commons:commons-lang3:3.11" />
         </list>
       </option>
       <option name="ignoredReasons">
@@ -33,6 +37,8 @@
           <option value="No big deal for now" />
           <option value="Not a biggie" />
           <option value="Not a biggie" />
+          <option value="No biggie" />
+          <option value="No biggie" />
           <option value="No biggie" />
         </list>
       </option>
