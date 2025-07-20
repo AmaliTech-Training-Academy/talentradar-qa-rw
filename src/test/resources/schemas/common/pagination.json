@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pagination.json",
+  "type": "object",
+  "required": ["total", "limit", "offset", "hasMore"],
+  "properties": {
+    "total": { "type": "integer", "minimum": 0 },
+    "limit": { "type": "integer", "minimum": 1 },
+    "offset": { "type": "integer", "minimum": 0 },
+    "hasMore": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

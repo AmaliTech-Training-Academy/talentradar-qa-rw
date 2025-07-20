@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "assessmentOnly.json"
+    },
+    {
+      "properties": {
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "dimension_definition": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string", "format": "uuid" },
+                      "dimension_name": { "type": "string" },
+                      "description": { "type": "string" }
+                    },
+                    "required": ["id", "dimension_name", "description"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["dimension_definition"],
+                "additionalProperties": false
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

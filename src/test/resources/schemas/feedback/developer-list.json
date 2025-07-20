@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "developer-list-response.json",
+  "allOf": [
+    {
+      "$ref": "../common/base-response.json"
+    },
+    {
+      "if": {
+        "properties": { "success": { "const": true } }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "fullName", "userName", "email", "scores", "role"],
+              "properties": {
+                "id": { "type": "string", "format": "uuid" },
+                "fullName": { "type": "string" },
+                "userName": { "type": "string" },
+                "email": { "type": "string", "format": "email" },
+                "scores": { "type": "string" },
+                "role": { "type": "string", "const": "DEVELOPER" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "pagination": {
+            "$ref": "../common/pagination.json"
+          }
+        },
+        "required": ["data", "pagination"]
+      }
+    }
+  ]
+}

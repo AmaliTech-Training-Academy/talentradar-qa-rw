@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["success", "errors", "message"],
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "const": false
+    },
+    "errors": {
+      "type": "string",
+      "example": "Authentication required"
+    },
+    "message": {
+      "type": "string",
+      "example": "Valid manager credentials required"
+    }
+  },
+  "additionalProperties": false
+}

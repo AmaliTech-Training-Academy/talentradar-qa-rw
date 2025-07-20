@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    { "$ref": "../common/base-response.json" },
+    {
+      "type": "object",
+      "properties": {
+        "success": { "const": true },
+        "data": {
+          "type": "object",
+          "required": ["developer_id", "feedback_history", "pagination"],
+          "properties": {
+            "developer_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "feedback_history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "feedback_id",
+                  "manager_id",
+                  "feedback_version",
+                  "created_at",
+                  "dimensions_count",
+                  "comments_count"
+                ],
+                "properties": {
+                  "feedback_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "manager_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "feedback_version": {
+                    "type": "integer"
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "dimensions_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "comments_count": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "pagination": {
+              "$ref": "../common/pagination.json"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["success", "data"],
+      "additionalProperties": false
+    }
+  ]
+}

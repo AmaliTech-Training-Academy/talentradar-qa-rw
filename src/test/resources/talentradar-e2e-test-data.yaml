@@ -1,0 +1,70 @@
+login:
+  success:
+    - tag: "admin"
+      credentials:
+        email: ${ADMIN_EMAIL}
+        password: ${ADMIN_PASS}
+      expectedMessage: "Login successful"
+    - tag: "manager"
+      credentials:
+        email: ${MANAGER_EMAIL}
+        password: ${MANAGER_PASS}
+      expectedMessage: "Login successful"
+    - tag: "developer"
+      credentials:
+        email: ${DEVELOPER_EMAIL}
+        password: ${DEVELOPER_PASS}
+      expectedMessage: "Login successful"
+  unauthorized:
+    - tag: "Wrong password"
+      credentials:
+        email: "admin@talentradar.ai"
+        password: "WrongPass"
+      expectedMessage: "Unauthorized"
+    - tag: "Wrong email"
+      credentials:
+        email: "unknown@talentradar.ai"
+        password: "DeveloperPass456"
+      expectedMessage: "Unauthorized"
+  validation:
+    - tag: "short password"
+      credentials:
+        email: "admin@talentradar.ai"
+        password: "pa"
+      expectedMessage: "It must contain at least: 1 number, 1 letter, 1 special. character & be at least 6 chars"
+    - tag: "invalid email"
+      credentials:
+        email: "admin@talentradar"
+        password: "AdminPass@456"
+      expectedMessage: "Invalid input"
+    - tag: "empty password"
+      credentials:
+        email: "admin@talentradar.ai"
+        password: ""
+      expectedMessage: "Password is required"
+  xss:
+    - tag: ""
+      credentials:
+        email: "admin@talentradar.ai"
+        password: "<svg onload=window.x=1>"
+      expectedMessage: "1"
+    - tag: ""
+      credentials:
+        email: "admin@talentradar.ai"
+        password: "\"><img src=x onerror=window.x=1>"
+      expectedMessage: "1"
+    - tag: ""
+      credentials:
+        email: "admin@talentradar.ai"
+        password: "<script>window.x=1</script>"
+      expectedMessage: "1"
+    - tag: ""
+      credentials:
+        email: "admin@talentradar.ai"
+        password: "<iframe src=javascript:alert(1)>"
+      expectedMessage: "1"
+    - tag: ""
+      credentials:
+        email: "admin@talentradar.ai"
+        password: "<details open ontoggle=window.x=1>"
+      expectedMessage: "1"

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="com.obiscr.chatgpt.settings.EasyCodeState">
+    <option name="projectFiles" value="$PROJECT_DIR$/src/main/java/com/page/Base.java;/home/stevie/Projects/Amalitech/talentradar-qa-rw/src/main/java/com/pojo/RootData.java;/home/stevie/Projects/Amalitech/talentradar-qa-rw/src/main/java/com/util/DriverFactory.java;/home/stevie/Projects/Amalitech/talentradar-qa-rw/src/main/java/com/util/WaitUtil.java;/home/stevie/Projects/Amalitech/talentradar-qa-rw/src/main/java/com/util/YamlDataLoader.java;/home/stevie/Projects/Amalitech/talentradar-qa-rw/src/main/resources/test_data.yaml;/home/stevie/Projects/Amalitech/talentradar-qa-rw/src/test/java/base/TestBase.java;/home/stevie/Projects/Amalitech/talentradar-qa-rw/README.md" />
+  </component>
+</project>

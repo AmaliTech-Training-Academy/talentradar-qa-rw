@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "assessmentOnly.json",
+  "type": "object",
+  "required": ["assessment", "dimensions"],
+  "properties": {
+    "assessment": { "$ref": "assessmentItem.json"},
+    "dimensions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "assessment_id": { "type": "string", "format": "uuid" },
+          "dimension_definition_id": { "type": "string", "format": "uuid" },
+          "rating": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "created_at": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "assessment_id", "dimension_definition_id", "rating", "created_at"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

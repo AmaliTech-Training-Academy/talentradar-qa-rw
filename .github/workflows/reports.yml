@@ -1,0 +1,267 @@
+name: Reports
+on:
+  push:
+    branches:
+      - staging
+      - production
+    paths-ignore:
+      - '.github/badges/**'
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run tests
+        continue-on-error: true
+        run: |
+          set +e
+          mvn clean test
+          echo "TEST_EXIT_CODE=$?" >> $GITHUB_ENV
+          set -e
+
+      - name: Install xmllist for parsing allure-reports to create custom badges
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+      - name: Generate custom test badge
+        run: |
+          mkdir -p ".github/badges"
+          
+          TOTAL=0
+          FAILS=0
+          
+          for file in target/surefire-reports/*.xml; do
+            if [ -f "$file" ]; then
+              t=$(xmllint --xpath "count(//testcase)" "$file" 2>/dev/null)
+              t=${t%.*}
+              TOTAL=$((TOTAL + t))
+              
+              f=$(xmllint --xpath "count(//testcase[failure or error])" "$file" 2>/dev/null)
+              f=${f%.*}
+              FAILS=$((FAILS + f))
+            fi
+          done
+
+          PASSED=$((TOTAL - FAILS))
+
+          if [ "$TOTAL" -gt 0 ]; then
+            PERCENT=$((100 * PASSED / TOTAL))
+          else
+            PERCENT=0
+          fi
+
+          if [ "$PERCENT" -ge 85 ]; then
+            COLOR="brightgreen"
+          elif [ "$PERCENT" -ge 65 ]; then
+            COLOR="yellow"
+          else
+            COLOR="red"
+          fi
+
+          echo "{\"schemaVersion\":1,\"label\":\"Post API Tests\",\"message\":\"$PASSED/$TOTAL ($PERCENT%)\",\"color\":\"$COLOR\"}" > ".github/badges/api-testing-ci.json"
+
+      - name: Publish custom badge
+        if: always()
+        run: |
+          git add .github/badges/*.json
+          
+          if git diff --cached --quiet; then
+            echo "No badge changes to commit."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -m "[skip ci] Update all badges"
+            git push
+          fi
+
+      - name: Upload jacoco report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jacoco
+          path: target/
+
+      - name: Upload Allure results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results
+          path: target/allure-results/
+          retention-days: 7
+
+      - name: Set success icon
+        if: ${{ env.TEST_EXIT_CODE }} == '0'
+        run: |
+          echo 'SLACK_STATUS_ICON=:white_check_mark: PASSED' >> $GITHUB_ENV
+          echo "JOB_STATUS=Success" >> $GITHUB_ENV
+
+      - name: Set failure icon
+        if: ${{ env.TEST_EXIT_CODE }} != '0'
+        run: |
+          echo 'SLACK_STATUS_ICON=:x: FAILED' >> $GITHUB_ENV
+          echo "JOB_STATUS=Failure" >> $GITHUB_ENV
+
+      - name: Set cancellation icon
+        if: cancelled()
+        run: |
+          echo 'SLACK_STATUS_ICON=:warning: CANCELLED' >> $GITHUB_ENV
+          echo "JOB_STATUS=Cancelled" >> $GITHUB_ENV
+
+      - name: Slack Notification - Job Finished
+        if: always()
+        uses: slackapi/slack-github-action@v2.1.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "*API Test Results:* ${{ env.SLACK_STATUS_ICON }}"
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "Workflow: _${{ github.workflow }}_\n Status: `${{ env.JOB_STATUS }}`\nBranch: _${{ github.ref }}_\nCommit: `${{ github.sha }}`\n:link: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>"
+
+  generate-allure-report:
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download results
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: allure-results
+          path: allure-results/
+
+      - name: Get Allure history
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Generate Allure Report
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        with:
+          allure_results: allure-results
+          allure_history: allure-history
+          keep_reports: 1
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
+          force_orphan: true
+
+      - name: Set report success icon
+        if: success()
+        run: 'echo "REPORT_STATUS_ICON=:white_check_mark: REPORT GENERATED" >> $GITHUB_ENV'
+
+      - name: Set report failure icon
+        if: failure()
+        run: 'echo "REPORT_STATUS_ICON=:x: REPORT FAILED" >> $GITHUB_ENV'
+
+      - name: Set report cancellation icon
+        if: cancelled()
+        run: 'echo "REPORT_STATUS_ICON=:warning: REPORT CANCELLED" >> $GITHUB_ENV'
+
+      - name: Slack Notification - Report Generation Finished
+        if: always()
+        uses: slackapi/slack-github-action@v2.1.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "*Allure Report Status:* ${{ env.REPORT_STATUS_ICON }}"
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "Workflow: _${{ github.workflow }}_\n Branch: _${{ github.ref }}_\n:globe_with_meridians: <https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}|View Allure Report>\n:link: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>"
+
+  generate-coverage-report:
+    needs: test
+    runs-on: ubuntu-latest
+    if: always()
+    continue-on-error: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download exec
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: jacoco
+          path: target/
+
+      - name: Generate JaCoCo report
+        run: mvn compile jacoco:report
+
+      - name: Upload coverage report to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: target/site/jacoco/jacoco.xml
+
+      - name: Set report success icon
+        if: success()
+        run: 'echo "COVERALLS_STATUS_ICON=:white_check_mark: REPORT GENERATED" >> $GITHUB_ENV'
+
+      - name: Set report failure icon
+        if: failure()
+        run: 'echo "COVERALLS_STATUS_ICON=:x: REPORT FAILED" >> $GITHUB_ENV'
+
+      - name: Set report cancellation icon
+        if: cancelled()
+        run: 'echo "COVERALLS_STATUS_ICON=:warning: REPORT CANCELLED" >> $GITHUB_ENV'
+
+      - name: Slack Notification - Report Generation Finished
+        if: always()
+        uses: slackapi/slack-github-action@v2.1.0
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            blocks:
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "*Coverage Report Status:* ${{ env.COVERALLS_STATUS_ICON }}"
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "Workflow: _${{ github.workflow }}_\nBranch: _${{ github.ref }}_\n:link: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>"

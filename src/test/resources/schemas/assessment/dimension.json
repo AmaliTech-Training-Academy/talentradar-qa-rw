@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "dimension.json",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "dimension_name": { "type": "string" },
+    "description": { "type": "string" },
+    "weight": { "type": "string", "pattern": "^(100|[1-9][0-9]?|0)$" },
+    "criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "criteria_name": { "type": "string" }
+        },
+        "required": ["id", "criteria_name"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["id", "dimension_name", "description", "weight", "criteria"],
+  "additionalProperties": false
+}

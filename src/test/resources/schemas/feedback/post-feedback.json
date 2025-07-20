@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "feedback-post-response.json",
+  "allOf": [
+    {
+      "$ref": "../common/base-response.json"
+    },
+    {
+      "if": {
+        "properties": { "success": { "const": true } }
+      },
+      "then": {
+        "properties": {
+          "message": { "type": "string" },
+          "data": {
+            "type": "object",
+            "required": [
+              "feedback_id",
+              "manager_id",
+              "developer_id",
+              "feedback_version",
+              "created_at",
+              "updated_at",
+              "dimensions",
+              "comments"
+            ],
+            "properties": {
+              "feedback_id": { "type": "string", "format": "uuid" },
+              "manager_id": { "type": "string", "format": "uuid" },
+              "developer_id": { "type": "string", "format": "uuid" },
+              "feedback_version": { "type": "integer" },
+              "created_at": { "type": "string", "format": "date-time" },
+              "updated_at": { "type": "string", "format": "date-time" },
+              "dimensions": {
+                "type": "array",
+                "items": {
+                  "$ref": "../common/dimension-list.json"
+                }
+              },
+              "comments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["id", "comment_title", "comment_content"],
+                  "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "comment_title": { "type": "string" },
+                    "comment_content": { "type": "string" }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": ["data"]
+      }
+    }
+  ]
+}

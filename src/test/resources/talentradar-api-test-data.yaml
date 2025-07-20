@@ -1,0 +1,511 @@
+login:
+  success:
+    - description: "admin"
+      payload:
+        email: "admin@talentradar.ai"
+        password: "AdminPass456"
+      expected:
+        status: 200
+        role: ADMIN
+        schema: "schemas/auth/loggedIn.json"
+    - description: "manager"
+      payload:
+        email: "manager@talentradar.ai"
+        password: "ManagerPass456"
+      expected:
+        status: 200
+        role: MANAGER
+        schema: "schemas/auth/loggedIn.json"
+    - description: "developer"
+      payload:
+        email: "developer@talentradar.ai"
+        password: "DeveloperPass456"
+      expected:
+        status: 200
+        role: DEVELOPER
+        schema: "schemas/auth/loggedIn.json"
+  unauthorized:
+    - description: "Wrong password"
+      payload:
+        email: "admin@talentradar.ai"
+        password: "WrongPass"
+      expected:
+        status: 401
+        role: ""
+        schema: "schemas/auth/unauthorized.json"
+    - description: "Wrong email"
+      payload:
+        email: "developer@talentradar"
+        password: "DeveloperPass456"
+      expected:
+        status: 401
+        role: ""
+        schema: "schemas/auth/unauthorized.json"
+
+users:
+  allOnlyAdmin:
+    - role: manager
+      expected:
+        status: 401
+        schema: "schemas/common/accessDenied.json"
+    - role: developer
+      expected:
+        status: 401
+        schema: "schemas/common/accessDenied.json"
+  currentUser:
+    - role: developer
+      expected:
+        status: 200
+        role: DEVELOPER
+        schema: "schemas/users/currentUser.json"
+    - role: manager
+      expected:
+        status: 200
+        role: MANAGER
+        schema: "schemas/users/currentUser.json"
+    - role: admin
+      expected:
+        status: 200
+        role: ADMIN
+        schema: "schemas/users/currentUser.json"
+
+registration:
+  success:
+    invite:
+      newUser:
+        email: "testuser12@talentradar.ai"
+        roleId: ${DEVELOPER_ROLE_ID}
+      expected:
+        status: 201
+        schema: "schemas/registration/userCreated.json"
+    completeRegistration:
+      invite:
+        newUser:
+          email: "testmanager14@talentradar.ai"
+          roleId: ${MANAGER_ROLE_ID}
+        expected:
+          status: 201
+          schema: "schemas/registration/userCreated.json"
+      payload:
+        fullName: TestUser14 Manager
+        password: ${ANY_USER_PASS}
+        confirmPassword: ${ANY_USER_PASS}
+      expected:
+        status: 200
+        schema: "schema/registration/registrationComplete.json"
+  unsuccessful:
+    onlyAdmin:
+      - role: manager
+        newUser:
+          email: "testuser15@talentradar.ai"
+          roleId: ${DEVELOPER_ROLE_ID}
+        expected:
+          status: 401
+          schema: "schemas/users/registration/unauthorizedToCreateUser.json"
+      - role: developer
+        newUser:
+          email: "testuser16@talentradar.ai"
+          roleId: ${MANAGER_ROLE_ID}
+        expected:
+          status: 401
+          schema: "schemas/users/registration/unauthorizedToCreateUser.json"
+    invalidFields:
+      - description: "invalid email"
+        newUser:
+          email: "testuser17@talentradar"
+          roleId: ${DEVELOPER_ROLE_ID}
+        expected:
+          status: 422
+          schema: "schemas/users/registration/unprocessable.json"
+      - description: "wrong role"
+        newUser:
+          email: "testuser17@talentradar"
+          roleId: "wrong role id 3215"
+        expected:
+          status: 422
+          schema: "schemas/users/registration/unprocessable.json"
+      - description: "email is missing"
+        newUser:
+          roleId: ${DEVELOPER_ROLE_ID}
+        expected:
+          status: 422
+          schema: "schemas/users/registration/unprocessable.json"
+      - description: "role is missing"
+        newUser:
+          email: "testuser17@talentradar"
+        expected:
+          status: 422
+          schema: "schemas/users/registration/unprocessable.json"
+    invalidInvite:
+      - description: "expired invite token"
+        token: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiMmU0NzJmNy01MzU4LTQ1MjItOGMzMC00ZDVlNGJiZmIzMDQiLCJlbWFpbCI6InNudGFraXJ1dGltYW5hNzJAZ21haWwuY29tIiwicm9sZUlkIjoiMjQzOWJiYTUtOGJlMC00NDA1LWFjNTEtNjA3OTQyYzMxMDE3IiwiaWF0IjoxNzUyNzUxMzU2LCJleHAiOjE3NTI4Mzc3NTZ9.78Q36NU_-H9mEYV76QM6cK4NzySFmjmJWBKZkpiFh84"
+        expected:
+          status: 400
+          schema: "schemas/users/registration/invalidInvite.json"
+      - description: "tempered with token"
+        token: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiMmU0NzJmNy01MzU4LTQ1MjItOGMzMC00ZDVlNGJiZmIzMDQiLCJlbWFpbCI6InNudGFraXJ1dGltYW5hNzJAZ21haWwuY29tIiwicm9sZUlkIjoiMjQzOWJiYTUtOGJlMC00NDA1LWFjNTEtNjA3OTQyYzMxME3IiwiaWF0IjoxNzUyNzUxMzU2LCJleHAiOjE3NTI4Mzc3NTZ9.78Q36NU_-H9mEYV76QM6cK4NzySFmjmJWBKZkpiFh84"
+        expected:
+          status: 400
+          schema: "schemas/users/registration/invalidInvite.json"
+
+roles:
+  onlyAdminCanQueryAllRoles:
+    - role: manager
+      expected:
+        status: 401
+        schema: "schemas/roles/unauthorized.json"
+    - role: developer
+      expected:
+        status: 401
+        schema: "schemas/roles/unauthorized.json"
+
+sessions:
+  unauthorized:
+    - role: manager
+      expected:
+        status: 401
+        schema: "schemas/admin/sessions/unauthorized.json"
+    - role: developer
+      expected:
+        status: 401
+        schema: "schemas/admin/sessions/unauthorized.json"
+
+selfAssessment:
+  create:
+    payload:
+      dimensions:
+        TechnicalExcellence: 1
+        CommunicationCollaboration: 2
+        TeamDynamicsLeadership: 3
+        ExecutionResults: 4
+        GrowthInnovation: 5
+      reflection: "Focused on growing leadership."
+      status: "SUBMITTED"
+    expected:
+      status: 201
+      schema: "schemas/assessment/createSelfAssessmentSuccess.json"
+
+  update:
+    - create:
+        payload:
+          dimensions:
+            TechnicalExcellence: 1
+            CommunicationCollaboration: 2
+            TeamDynamicsLeadership: 3
+            ExecutionResults: 4
+            GrowthInnovation: 5
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 201
+          schema: "schemas/assessment/createSelfAssessmentSuccess.json"
+      payload:
+        dimensions:
+          TechnicalExcellence: 4
+          CommunicationCollaboration: 3
+          TeamDynamicsLeadership: 5
+        status: "DRAFT"
+      expected:
+        status: 200
+        schema: "schemas/assessment/updateSelfAssessmentSuccess.json"
+    - create:
+        payload:
+          dimensions:
+            TechnicalExcellence: 1
+            CommunicationCollaboration: 2
+            TeamDynamicsLeadership: 3
+            ExecutionResults: 4
+            GrowthInnovation: 5
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 201
+          schema: "schemas/assessment/createSelfAssessmentSuccess.json"
+      payload:
+        dimensions:
+          ExecutionResults: 4
+          GrowthInnovation: 3
+        reflection: "Updated reflection goals"
+        status: "SUBMITTED"
+      expected:
+        status: 200
+        schema: "schemas/assessment/updateSelfAssessmentSuccess.json"
+
+  alreadyComplete:
+    create:
+      payload:
+        dimensions:
+          TechnicalExcellence: 1
+          CommunicationCollaboration: 2
+          TeamDynamicsLeadership: 3
+          ExecutionResults: 4
+          GrowthInnovation: 5
+        reflection: "Focused on growing leadership."
+        status: "SUBMITTED"
+      expected:
+        status: 201
+        schema: "schemas/assessment/createSelfAssessmentSuccess.json"
+    payload:
+      status: "DRAFT"
+      reflection: "Attempt to update a complete assessment"
+    expected:
+      status: 409
+      schema: "schemas/assessment/statusConflict.json"
+
+  leakCreate:
+    payload:
+      dimensions:
+        TechnicalExcellence: 1
+        CommunicationCollaboration: 2
+        TeamDynamicsLeadership: 3
+        ExecutionResults: 4
+        GrowthInnovation: 5
+      reflection: "Focused on growing leadership."
+      status: "DRAFT"
+    expected:
+      status: 403
+      schema: "schemas/assessment/assessmentResponseError.json"
+
+  unprocessable:
+    create:
+      - description: missing dimension
+        payload:
+          dimensions:
+            CommunicationCollaboration: 2
+            TeamDynamicsLeadership: 3
+            ExecutionResults: 4
+            GrowthInnovation: 5
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: missing dimension
+        payload:
+          dimensions:
+            TechnicalExcellence: 1
+            TeamDynamicsLeadership: 3
+            ExecutionResults: 4
+            GrowthInnovation: 5
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: missing dimension
+        payload:
+          dimensions:
+            TechnicalExcellence: 1
+            CommunicationCollaboration: 2
+            ExecutionResults: 4
+            GrowthInnovation: 5
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: missing dimension
+        payload:
+          dimensions:
+            TechnicalExcellence: 1
+            CommunicationCollaboration: 2
+            TeamDynamicsLeadership: 3
+            GrowthInnovation: 5
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: missing dimension
+        payload:
+          dimensions:
+            TechnicalExcellence: 1
+            CommunicationCollaboration: 2
+            TeamDynamicsLeadership: 3
+            ExecutionResults: 4
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: missing reflection
+        payload:
+          dimensions:
+            TechnicalExcellence: 1
+            CommunicationCollaboration: 2
+            TeamDynamicsLeadership: 3
+            ExecutionResults: 4
+            GrowthInnovation: 5
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: missing status
+        payload:
+          dimensions:
+            TechnicalExcellence: 1
+            CommunicationCollaboration: 2
+            TeamDynamicsLeadership: 3
+            ExecutionResults: 4
+            GrowthInnovation: 5
+          reflection: "Focused on growing leadership."
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: wrong status
+        payload:
+          dimensions:
+            TechnicalExcellence: 1
+            CommunicationCollaboration: 2
+            TeamDynamicsLeadership: 3
+            ExecutionResults: 4
+            GrowthInnovation: 5
+          reflection: "Focused on growing leadership."
+          status: "CREATED"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: invalid status
+        payload:
+          dimensions:
+            TechnicalExcellence: 1
+            CommunicationCollaboration: 2
+            TeamDynamicsLeadership: 3
+            ExecutionResults: 4
+            GrowthInnovation: 5
+          reflection: "Focused on growing leadership."
+          status: 7
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: invalid dimension rate
+        payload:
+          dimensions:
+            TechnicalExcellence: 7
+            CommunicationCollaboration: 3
+            TeamDynamicsLeadership: 5
+            ExecutionResults: 2
+            GrowthInnovation: 2
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: invalid dimension rate
+        payload:
+          dimensions:
+            TechnicalExcellence: 4
+            CommunicationCollaboration: 6
+            TeamDynamicsLeadership: 5
+            ExecutionResults: 2
+            GrowthInnovation: 1
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: invalid dimension rate
+        payload:
+          dimensions:
+            TechnicalExcellence: 4
+            CommunicationCollaboration: 3
+            TeamDynamicsLeadership: 7
+            ExecutionResults: 2
+            GrowthInnovation: 3
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: invalid dimension rate
+        payload:
+          dimensions:
+            TechnicalExcellence: 4
+            CommunicationCollaboration: 3
+            TeamDynamicsLeadership: 3
+            ExecutionResults: 0
+            GrowthInnovation: 3
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: invalid dimension rate
+        payload:
+          dimensions:
+            TechnicalExcellence: 4
+            CommunicationCollaboration: 3
+            TeamDynamicsLeadership: 4
+            ExecutionResults: 2
+            GrowthInnovation: 0
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: invalid dimension rate
+        payload:
+          dimensions:
+            TechnicalExcellence: "y"
+            CommunicationCollaboration: 3
+            TeamDynamicsLeadership: 4
+            ExecutionResults: 2
+            GrowthInnovation: 0
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: invalid dimension rate
+        payload:
+          dimensions:
+            TechnicalExcellence: 3
+            CommunicationCollaboration: "e"
+            TeamDynamicsLeadership: 4
+            ExecutionResults: 2
+            GrowthInnovation: 0
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: invalid dimension rate
+        payload:
+          dimensions:
+            TechnicalExcellence: 3
+            CommunicationCollaboration: 3
+            TeamDynamicsLeadership: "g"
+            ExecutionResults: 2
+            GrowthInnovation: 0
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: invalid dimension rate
+        payload:
+          dimensions:
+            TechnicalExcellence: 3
+            CommunicationCollaboration: 3
+            TeamDynamicsLeadership: 4
+            ExecutionResults: "t"
+            GrowthInnovation: 0
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"
+      - description: invalid dimension rate
+        payload:
+          dimensions:
+            TechnicalExcellence: 3
+            CommunicationCollaboration: 3
+            TeamDynamicsLeadership: 4
+            ExecutionResults: 2
+            GrowthInnovation: "r"
+          reflection: "Focused on growing leadership."
+          status: "DRAFT"
+        expected:
+          status: 400
+          schema: "schemas/assessment/assessmentResponseError.json"

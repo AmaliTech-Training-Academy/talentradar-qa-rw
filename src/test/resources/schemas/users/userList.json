@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["success", "message", "data"],
+  "properties": {
+    "success": { "type": "boolean", "const": true },
+    "message": { "type": "string", "const":  "Users fetched successfully" },
+    "data": {
+      "type": "object",
+      "required": ["users", "pagination"],
+      "properties": {
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "username", "email", "full_name", "role", "status", "created_at"],
+            "properties": {
+              "id": { "type": "string", "format": "uuid" },
+              "username": { "type": "string" },
+              "email": { "type": "string", "format": "email" },
+              "full_name": { "type": "string" },
+              "role": { "type": "string", "enum": ["ADMIN", "MANAGER", "DEVELOPER"] },
+              "status": { "type": "string", "enum": ["Active", "Inactive"] },
+              "created_at": { "type": "string", "format": "date-time" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "pagination": { "$ref": "../common/pagination.json" }
+      },
+      "additionalProperties": false
+    },
+    "errors": { "type": "null" }
+  },
+  "additionalProperties": false
+}

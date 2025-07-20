@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["status", "message"],
+  "properties": {
+    "status": {
+      "type": "boolean",
+      "const": true
+    },
+    "message": {
+      "type": "string",
+      "const": "Session revoked"
+    },
+    "data": {
+      "type": "null"
+    },
+    "errors": {
+      "type": "null"
+    }
+  },
+  "additionalProperties": false
+}
