@@ -1,1 +1,4 @@
-[![Notification-Service Test Coverage](https://img.shields.io/coveralls/github/AmaliTech-Training-Academy/talentradar-notification-service-rw?label=Notification-Service%20Test%20Coverage)](https://coveralls.io/github/AmaliTech-Training-Academy/talentradar-notification-service-rw)
+### Test Coverage Report
+| Notification-Service | AI-Analysis-Service | Assessment-Service | Feedback-Service |
+|----------------------|---------------------|--------------------|------------------|
+| [![Coverage Status](https://coveralls.io/repos/github/AmaliTech-Training-Academy/talentradar-notification-service-rw/badge.svg)](https://coveralls.io/github/AmaliTech-Training-Academy/talentradar-notification-service-rw) |
