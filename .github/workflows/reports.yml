@@ -34,7 +34,7 @@ jobs:
         if: always()
         with:
           name: jacoco
-          path: target/
+          path: target/jacoco.exec
 
       - name: Upload Allure results
         uses: actions/upload-artifact@v4
