@@ -1,1 +1,0 @@
-# talentradar-qa-rw
