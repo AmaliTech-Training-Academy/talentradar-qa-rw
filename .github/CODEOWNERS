@@ -1,7 +1,0 @@
-# Code owners for talentradar-qa-rw
-# Global owners for all files (except .github/)
-*  @sntakirutimana72
-
-# GitHub folder specific owners
-.github/ @bikaze @muhirwaJD
-
