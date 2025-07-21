@@ -5,8 +5,6 @@ import io.restassured.specification.ResponseSpecification;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import static org.hamcrest.Matchers.startsWith;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ResponseSpecs {
 
@@ -20,7 +18,7 @@ public class ResponseSpecs {
   public static ResponseSpecification authSpec(int statusCode) {
     return new ResponseSpecBuilder()
       .addResponseSpecification(defaultSpec(statusCode))
-      .expectHeader("Authorization", startsWith("Bearer "))
+      .expectCookie("token")
       .build();
   }
 }

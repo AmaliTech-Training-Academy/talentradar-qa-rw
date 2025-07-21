@@ -28,12 +28,8 @@ public class DimensionTests extends APIBaseTest {
   @Test
   @Severity(SeverityLevel.CRITICAL)
   @Description("Verify fetching dimensions when authenticated")
-  public void verifyGetDimensionsWhenAuthenticated() {
-    String token = JwtUtil.generateToken(Map.of("email", "admin@talentradar.ai"),
-                                         EnvUtil.getEnv("JWT_SECRET"),
-                                         new Date(),
-                                         new Date(System.currentTimeMillis() + 15 * 60 * 1000));
-    AssessmentApi.getDimensions(token, 401)
+  public void verifyGetDimensionsWhenAuthenticated() {;
+    AssessmentApi.getDimensions(JwtUtil.generateValidToken("admin"), 401)
       .then()
       .body(matchesJsonSchemaInClasspath("schemas/assessment/authenticationRequired.json"));
   }

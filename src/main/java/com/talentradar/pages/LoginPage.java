@@ -34,6 +34,14 @@ public class LoginPage extends BasePage {
     }
   }
 
+  public void waitForValidationError(String error) {
+    page.locator("p:text('" + error + "')").waitFor();
+  }
+
+  public void waitForLoginFailure() {
+    page.locator("div:text('Failure')").waitFor();
+  }
+
   @Step("Enter username or email: {usernameOrEmail}")
   private void enterUsernameOrEmail(String usernameOrEmail) {
     usernameOrEmailLocator.fill(usernameOrEmail);

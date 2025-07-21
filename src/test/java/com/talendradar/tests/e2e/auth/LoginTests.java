@@ -59,7 +59,8 @@ public class LoginTests extends BaseE2ETest {
     if (requestWasMade)
       throw new AssertionError("Unwanted API call detected");
 
-    Assert.assertTrue(page.waitForText("p", expectedMessage));
+    // Confirm the validation error message is shown
+    page.waitForValidationError(expectedMessage);
   }
 
   @Test(dataProvider = "xss", dataProviderClass = LoginDataProvider.class)
@@ -82,7 +83,7 @@ public class LoginTests extends BaseE2ETest {
     page.login(credentials.email(), credentials.password(), "developer");
 
     // Confirm failure UI is shown
-    Assert.assertTrue(page.waitForText("div", "Failure"));
+    page.waitForLoginFailure();
 
     // Check if XSS payload executed
     Boolean xssTriggered = (Boolean) playwrightPage.evaluate(String.format("() => window.x === %s", value));

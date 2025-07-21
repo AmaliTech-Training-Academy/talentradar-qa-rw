@@ -1,36 +1,59 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["success", "message", "data"],
+  "required": ["status", "message", "data"],
   "properties": {
-    "success": { "type": "boolean", "const": true },
-    "message": { "type": "string", "const":  "Users fetched successfully" },
+    "status": {
+      "type": "boolean",
+      "enum": [true]
+    },
+    "message": {
+      "type": "string",
+      "enum": ["Users retrieved successfully"]
+    },
     "data": {
       "type": "object",
-      "required": ["users", "pagination"],
+      "required": ["users", "pageInfo"],
       "properties": {
         "users": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["id", "username", "email", "full_name", "role", "status", "created_at"],
+            "required": ["id", "username", "email", "fullName", "role"],
             "properties": {
               "id": { "type": "string", "format": "uuid" },
-              "username": { "type": "string" },
+              "username": { "type": ["string", "null"] },
               "email": { "type": "string", "format": "email" },
-              "full_name": { "type": "string" },
-              "role": { "type": "string", "enum": ["ADMIN", "MANAGER", "DEVELOPER"] },
-              "status": { "type": "string", "enum": ["Active", "Inactive"] },
-              "created_at": { "type": "string", "format": "date-time" }
+              "fullName": { "type": ["string", "null"] },
+              "role": {
+                "type": "string",
+                "enum": ["ADMIN", "MANAGER", "DEVELOPER"]
+              }
             },
             "additionalProperties": false
           }
         },
-        "pagination": { "$ref": "../common/pagination.json" }
+        "pageInfo": {
+          "type": "object",
+          "required": ["page", "size", "totalElements", "totalPages", "hasNext", "hasPrevious", "last", "first"],
+          "properties": {
+            "page": { "type": "integer", "minimum": 1 },
+            "size": { "type": "integer", "minimum": 1 },
+            "totalElements": { "type": "integer", "minimum": 0 },
+            "totalPages": { "type": "integer", "minimum": 1 },
+            "hasNext": { "type": "boolean" },
+            "hasPrevious": { "type": "boolean" },
+            "last": { "type": "boolean" },
+            "first": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     },
-    "errors": { "type": "null" }
+    "errors": {
+      "type": ["string", "null"]
+    }
   },
   "additionalProperties": false
 }

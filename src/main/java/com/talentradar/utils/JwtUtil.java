@@ -1,35 +1,43 @@
 package com.talentradar.utils;
 
+import com.talentradar.pojo.LoginCredentials;
+import com.talentradar.pojo.NewUserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.security.Key;
 import java.util.Date;
-import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JwtUtil {
 
-  private static JwtBuilder buildJwt(Map<String, Object> claims, String secret, Date issuedAt, Date expiredAt) {
-    JwtBuilder jwtBuilder = Jwts.builder()
-      .setIssuedAt(issuedAt)
-      .setExpiration(expiredAt)
-      .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret)), SignatureAlgorithm.HS256);
-    claims.forEach(jwtBuilder::claim);
-    return jwtBuilder;
+  private static Key key(String jwtSecret) {
+    return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
   }
 
-  public static String generateToken(Map<String, Object> claims, String secret, Date issuedAt, Date expiredAt) {
-    String email = (String) claims.get("email");
-    return buildJwt(claims, secret, issuedAt, expiredAt)
-      .setSubject(email)
+  public static String generateToken(LoginCredentials claims, String secret, Date issuedAt, Date expiredAt) {
+    return Jwts.builder()
+      .setSubject(claims.id())
+      .claim("email", claims.email())
+      .claim("fullName", claims.name())
+      .claim("role", claims.role())
+      .setIssuedAt(issuedAt)
+      .setExpiration(expiredAt)
+      .signWith(key(secret))
       .compact();
   }
 
-  public static String generateRegistrationInviteToken(Map<String, Object> claims, String secret, Date issuedAt, Date expiredAt) {
-    return buildJwt(claims, secret, issuedAt, expiredAt)
+  public static String generateRegistrationInviteToken(NewUserDetails claims, String secret, Date issuedAt, Date expiredAt) {
+    return Jwts.builder()
+      .setSubject(claims.id())
+      .claim("email", claims.email())
+      .claim("roleId", claims.roleId())
+      .setIssuedAt(issuedAt)
+      .setExpiration(expiredAt)
+      .signWith(Keys.hmacShaKeyFor(secret.getBytes()), SignatureAlgorithm.HS256)
       .compact();
   }
 
@@ -37,19 +45,22 @@ public final class JwtUtil {
     switch (role) {
       case "admin" -> {
         return generateToken(
-          Map.of("email", EnvUtil.getEnv("ADMIN_EMAIL"), "userId", EnvUtil.getEnv("ADMIN_ID")),
+          new LoginCredentials(EnvUtil.getEnv("ADMIN_ID"),
+                               EnvUtil.getEnv("ADMIN_EMAIL"), "Admin User", "ADMIN"),
           EnvUtil.getEnv("JWT_SECRET"), new Date(),
           new Date(System.currentTimeMillis() + 15 * 60 * 1000));
       }
       case "manager" -> {
         return generateToken(
-          Map.of("email", EnvUtil.getEnv("MANAGER_EMAIL"), "userId", EnvUtil.getEnv("MANAGER_ID")),
+          new LoginCredentials(EnvUtil.getEnv("MANAGER_ID"),
+                               EnvUtil.getEnv("MANAGER_EMAIL"), "Manager User", "MANAGER"),
           EnvUtil.getEnv("JWT_SECRET"), new Date(),
           new Date(System.currentTimeMillis() + 15 * 60 * 1000));
       }
       default -> {
         return generateToken(
-          Map.of("email", EnvUtil.getEnv("DEVELOPER_EMAIL"), "userId", EnvUtil.getEnv("DEVELOPER_ID")),
+          new LoginCredentials(EnvUtil.getEnv("DEVELOPER_ID"),
+                               EnvUtil.getEnv("DEVELOPER_EMAIL"), "Developer User", "DEVELOPER"),
           EnvUtil.getEnv("JWT_SECRET"), new Date(),
           new Date(System.currentTimeMillis() + 15 * 60 * 1000));
       }

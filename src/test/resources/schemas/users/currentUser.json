@@ -3,8 +3,8 @@
   "type": "object",
   "required": ["status", "message", "data"],
   "properties": {
-    "status": { "type": "boolean", "const":  true },
-    "message": { "type": "string", "const": "User retrieved successfully" },
+    "status": { "type": "boolean", "enum":  [true] },
+    "message": { "type": "string", "const": ["User retrieved successfully"] },
     "data": {
       "type": "object",
       "required": ["user"],
@@ -14,8 +14,8 @@
           "required": ["id", "username", "email", "role"],
           "properties": {
             "id": { "type": "string", "format": "uuid" },
-            "username": { "type": "string" },
-            "fullName": { "type": "string" },
+            "username": { "type": ["string", "null"] },
+            "fullName": { "type": ["string", "null"] },
             "email": { "type": "string", "format": "email" },
             "role": {
               "type": "string",
@@ -27,7 +27,7 @@
       },
       "additionalProperties": false
     },
-    "errors": { "type": "null" }
+    "errors": { "type": ["string", "null"] }
   },
   "additionalProperties": false
 }
