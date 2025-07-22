@@ -1,16 +1,12 @@
-package com.talendradar.tests.api.assessment;
+package com.talendradar.tests.api;
 
-import com.talendradar.tests.api.APIBaseTest;
+import com.talendradar.data.providers.api.RolesDataProvider;
 import com.talentradar.api.AssessmentApi;
-import com.talentradar.utils.EnvUtil;
 import com.talentradar.utils.JwtUtil;
 import io.qameta.allure.Description;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import org.testng.annotations.Test;
-
-import java.util.Date;
-import java.util.Map;
 
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
@@ -25,12 +21,12 @@ public class DimensionTests extends APIBaseTest {
       .body(matchesJsonSchemaInClasspath("schemas/assessment/authenticationRequired.json"));
   }
 
-  @Test
+  @Test(dataProvider = "role-labels", dataProviderClass = RolesDataProvider.class)
   @Severity(SeverityLevel.CRITICAL)
-  @Description("Verify fetching dimensions when authenticated")
-  public void verifyGetDimensionsWhenAuthenticated() {;
-    AssessmentApi.getDimensions(JwtUtil.generateValidToken("admin"), 401)
+  @Description("Verify any authenticated users can fetch dimensions")
+  public void verifyAnyAuthenticatedUserCanFetchDimensions(String role) {;
+    AssessmentApi.getDimensions(JwtUtil.generateValidToken(role), 200)
       .then()
-      .body(matchesJsonSchemaInClasspath("schemas/assessment/authenticationRequired.json"));
+      .body(matchesJsonSchemaInClasspath("schemas/common/dimensionList.json"));
   }
 }

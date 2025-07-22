@@ -1,9 +1,13 @@
 package com.talendradar.tests;
 
 import com.talentradar.utils.EnvUtil;
+import com.talentradar.utils.SystemLogger;
+import org.slf4j.Logger;
+import org.testng.annotations.BeforeClass;
 
 public abstract class BaseTest {
 
+  protected static Logger logger;
   protected static String API_BASE_URL,
     JWT_SECRET,
     ADMIN_EMAIL, ADMIN_ID, ADMIN_PASS,
@@ -12,7 +16,7 @@ public abstract class BaseTest {
 
   static {
     API_BASE_URL = EnvUtil.getEnv("API_BASE_URL");
-    JWT_SECRET = EnvUtil.getEnv("jwt_secret");
+    JWT_SECRET = EnvUtil.getEnv("JWT_SECRET");
 
     ADMIN_EMAIL = EnvUtil.getEnv("ADMIN_EMAIL");
     ADMIN_ID = EnvUtil.getEnv("ADMIN_ID");
@@ -26,4 +30,9 @@ public abstract class BaseTest {
     DEVELOPER_ID = EnvUtil.getEnv("DEVELOPER_ID");
     DEVELOPER_PASS = EnvUtil.getEnv("DEVELOPER_PASS");
   };
+
+  @BeforeClass
+  public void enableLogging() {
+    logger = SystemLogger.getLogger(getClass());
+  }
 }

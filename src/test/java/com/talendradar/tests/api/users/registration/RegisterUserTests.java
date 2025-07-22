@@ -19,7 +19,6 @@ public class RegisterUserTests extends UserRegistrationBaseTest {
   @Severity(SeverityLevel.CRITICAL)
   @Description("Verify only admin can create registration invite")
   public void verifyOnlyAdminCanRegisterUser(String role, Map<String, Object> newUser, ApiRegExpectedPojo expected) {
-    // Generate a non-admin user token & attempt to register a new user
     UserApi.registerUser(JwtUtil.generateValidToken(role), newUser, expected.status())
       .then()
       .body(matchesJsonSchemaInClasspath(expected.schema()));
@@ -40,7 +39,6 @@ public class RegisterUserTests extends UserRegistrationBaseTest {
   @Severity(SeverityLevel.CRITICAL)
   @Description("Verify admin can create and send registration invites")
   public void verifyAdminCanRegisterUser(Map<String, Object> newUser, ApiRegExpectedPojo expected) {
-    // Register user
     UserApi.registerUser(JwtUtil.generateValidToken("admin"), newUser, expected.status())
       .then()
       .body(matchesJsonSchemaInClasspath(expected.schema()));

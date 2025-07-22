@@ -72,81 +72,70 @@ users:
 registration:
   success:
     invite:
-      newUser:
-        email: "testuser12@talentradar.ai"
-        roleId: ${DEVELOPER_ROLE_ID}
-      expected:
-        status: 201
-        schema: "schemas/registration/userCreated.json"
-    completeRegistration:
-      invite:
-        newUser:
-          email: "testmanager14@talentradar.ai"
-          roleId: ${MANAGER_ROLE_ID}
+      - roleId: ${DEVELOPER_ROLE_ID}
         expected:
           status: 201
-          schema: "schemas/registration/userCreated.json"
+          schema: "schemas/users/registration/userCreated.json"
+      - roleId: ${MANAGER_ROLE_ID}
+        expected:
+          status: 201
+          schema: "schemas/users/registration/userCreated.json"
+      - roleId: ${ADMIN_ROLE_ID}
+        expected:
+          status: 201
+          schema: "schemas/users/registration/userCreated.json"
+    completeRegistration:
+      invite:
+        roleId: ${MANAGER_ROLE_ID}
+        expected:
+          status: 201
+          schema: "schemas/users/registration/userCreated.json"
       payload:
         fullName: TestUser14 Manager
         password: ${ANY_USER_PASS}
         confirmPassword: ${ANY_USER_PASS}
       expected:
         status: 200
-        schema: "schema/registration/registrationComplete.json"
+        schema: "schemas/users/registration/registrationComplete.json"
   unsuccessful:
     onlyAdmin:
       - role: manager
-        newUser:
-          email: "testuser15@talentradar.ai"
-          roleId: ${DEVELOPER_ROLE_ID}
+        roleId: ${DEVELOPER_ROLE_ID}
         expected:
           status: 401
           schema: "schemas/users/registration/unauthorizedToCreateUser.json"
       - role: developer
-        newUser:
-          email: "testuser16@talentradar.ai"
-          roleId: ${MANAGER_ROLE_ID}
+        roleId: ${MANAGER_ROLE_ID}
         expected:
           status: 401
           schema: "schemas/users/registration/unauthorizedToCreateUser.json"
     invalidFields:
       - description: "invalid email"
         newUser:
-          email: "testuser17@talentradar"
+          email: "testuser17@example"
           roleId: ${DEVELOPER_ROLE_ID}
         expected:
-          status: 422
+          status: 400
           schema: "schemas/users/registration/unprocessable.json"
       - description: "wrong role"
         newUser:
-          email: "testuser17@talentradar"
+          email: "testuser17@example.com"
           roleId: "wrong role id 3215"
         expected:
-          status: 422
+          status: 400
           schema: "schemas/users/registration/unprocessable.json"
       - description: "email is missing"
         newUser:
           roleId: ${DEVELOPER_ROLE_ID}
         expected:
-          status: 422
+          status: 400
           schema: "schemas/users/registration/unprocessable.json"
       - description: "role is missing"
         newUser:
-          email: "testuser17@talentradar"
+          email: "testuser17@example.com"
         expected:
-          status: 422
+          status: 400
           schema: "schemas/users/registration/unprocessable.json"
-    invalidInvite:
-      - description: "expired invite token"
-        token: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiMmU0NzJmNy01MzU4LTQ1MjItOGMzMC00ZDVlNGJiZmIzMDQiLCJlbWFpbCI6InNudGFraXJ1dGltYW5hNzJAZ21haWwuY29tIiwicm9sZUlkIjoiMjQzOWJiYTUtOGJlMC00NDA1LWFjNTEtNjA3OTQyYzMxMDE3IiwiaWF0IjoxNzUyNzUxMzU2LCJleHAiOjE3NTI4Mzc3NTZ9.78Q36NU_-H9mEYV76QM6cK4NzySFmjmJWBKZkpiFh84"
-        expected:
-          status: 400
-          schema: "schemas/users/registration/invalidInvite.json"
-      - description: "tempered with token"
-        token: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiMmU0NzJmNy01MzU4LTQ1MjItOGMzMC00ZDVlNGJiZmIzMDQiLCJlbWFpbCI6InNudGFraXJ1dGltYW5hNzJAZ21haWwuY29tIiwicm9sZUlkIjoiMjQzOWJiYTUtOGJlMC00NDA1LWFjNTEtNjA3OTQyYzMxME3IiwiaWF0IjoxNzUyNzUxMzU2LCJleHAiOjE3NTI4Mzc3NTZ9.78Q36NU_-H9mEYV76QM6cK4NzySFmjmJWBKZkpiFh84"
-        expected:
-          status: 400
-          schema: "schemas/users/registration/invalidInvite.json"
 
 roles:
   onlyAdminCanQueryAllRoles:

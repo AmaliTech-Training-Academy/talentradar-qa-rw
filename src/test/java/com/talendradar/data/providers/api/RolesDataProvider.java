@@ -10,4 +10,9 @@ public class RolesDataProvider extends APIBaseDataProvider {
       .map(ctx -> new Object[] { ctx.role(), ctx.expected() })
       .toArray(Object[][]::new);
   }
+
+  @DataProvider(name = "role-labels")
+  public static Object[][] roleLabes() {
+    return new Object[][] {{ "admin" }, { "manager" }, { "developer" }};
+  }
 }

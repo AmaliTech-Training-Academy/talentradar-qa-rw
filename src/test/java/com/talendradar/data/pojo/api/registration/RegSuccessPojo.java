@@ -1,3 +1,5 @@
 package com.talendradar.data.pojo.api.registration;
 
-public record RegSuccessPojo(ApiRegInvitePojo invite, ApiCompleteRegPojo completeRegistration) {}
+import java.util.List;
+
+public record RegSuccessPojo(List<ApiRegInvitePojo> invite, ApiCompleteRegPojo completeRegistration) {}
