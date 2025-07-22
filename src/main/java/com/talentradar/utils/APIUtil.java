@@ -42,7 +42,7 @@ public class APIUtil {
       .then()
       .body(matchesJsonSchemaInClasspath(schema))
       .extract()
-      .path("invitation");
+      .path("id");
   }
 
   public static List<Map<String, Object>> getDimensionsCache(String token) {

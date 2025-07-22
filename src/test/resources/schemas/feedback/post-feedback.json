@@ -34,7 +34,7 @@
               "dimensions": {
                 "type": "array",
                 "items": {
-                  "$ref": "../common/dimension-list.json"
+                  "$ref": "../common/dimensionList.json"
                 }
               },
               "comments": {

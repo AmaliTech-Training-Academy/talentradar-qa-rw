@@ -2,7 +2,6 @@ package com.talendradar.tests.e2e;
 
 import com.talendradar.tests.BaseTest;
 import com.talentradar.utils.EnvUtil;
-import com.talentradar.utils.SystemLogger;
 
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.Browser;
@@ -12,7 +11,6 @@ import com.microsoft.playwright.Page;
 
 import io.qameta.allure.Step;
 import io.qameta.allure.testng.Tag;
-import org.slf4j.Logger;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
 
@@ -24,13 +22,11 @@ public class BaseE2ETest extends BaseTest {
   private static final ThreadLocal<BrowserContext> contextThread = new ThreadLocal<>();
   private static final ThreadLocal<Page> pageThread = new ThreadLocal<>();
 
-  protected Logger logger;
   protected String BASE_URI;
 
   @BeforeClass
   @Parameters("browser")
   public void startup(@Optional("chromium") String browserName) {
-    logger = SystemLogger.getLogger(getClass());
     BASE_URI = EnvUtil.getEnv("E2E_BASE_URL");
 
     Playwright playwright = Playwright.create();
