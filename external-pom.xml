@@ -292,6 +292,7 @@
         <configuration>
           <includes>
             <include>**/*Test.java</include>
+            <include>**/*Tests.java</include>
           </includes>
           <printSummary>true</printSummary>
           <reportFormat>plain</reportFormat>
