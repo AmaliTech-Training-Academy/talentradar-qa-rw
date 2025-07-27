@@ -45,6 +45,17 @@
       margin-bottom: 40px;
     }
 
+    .repo-chip {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
     .reports-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -137,8 +148,8 @@
 <body>
 <div class="container">
   <h1>📊 Test Reports Dashboard</h1>
-  <p style="text-align: center; font-size: 18px;">
-    Comprehensive testing reports for {{REPO_NAME}}
+  <p style="display: flex; align-items: center; justify-content: center; font-size: 18px; gap: 5px;">
+    Comprehensive testing reports for <span class="repo-chip">{{REPO_NAME}}</span>
   </p>
 
   <div class="reports-grid">
