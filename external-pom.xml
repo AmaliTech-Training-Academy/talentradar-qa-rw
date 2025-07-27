@@ -354,6 +354,12 @@
             
             <!-- Security Folder -->
             <exclude>**/security/**</exclude>
+
+            <!-- Dtos & Custom exceptions -->
+            <exclude>**/dto/**</exclude>
+            <exclude>**/dtos/**</exclude>
+            <exclude>**/exception/**</exclude>
+            <exclude>**/exceptions/**</exclude>
           </excludes>
         </configuration>
         <executions>
