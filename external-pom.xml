@@ -336,6 +336,26 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.12</version>
+        <configuration>
+          <excludes>
+            <!-- Application Entry Point -->
+            <exclude>**/*Application.*</exclude>
+            
+            <!-- Config Folder -->
+            <exclude>**/config/**</exclude>
+            
+            <!-- Listeners Folder (singular and plural) -->
+            <exclude>**/listener/**</exclude>
+            <exclude>**/listeners/**</exclude>
+                     
+            <!-- Filters Folder (singular and plural) -->
+            <exclude>**/filter/**</exclude>
+            <exclude>**/filters/**</exclude>
+            
+            <!-- Security Folder -->
+            <exclude>**/security/**</exclude>
+          </excludes>
+        </configuration>
         <executions>
           <execution>
             <id>prepare-agent</id>
