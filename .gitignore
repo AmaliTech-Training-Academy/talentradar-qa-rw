@@ -12,6 +12,7 @@ screenshots/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/easycode/
 *.iws
 *.iml
 *.ipr
@@ -44,10 +45,18 @@ node_modules/
 
 ### Local Environment Variables ###
 .env
+.env.local
+!.env.prod
+!.env.production
+!.env.example
 
 # Log files
 git_repo_manager_*.log
 *.log
+
+# DB files
+*.db
+*.sqlite*
 
 # Temporary files
 *.tmp
