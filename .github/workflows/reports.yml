@@ -3,7 +3,7 @@ name: Reports
 on:
   push:
     branches:
-      - 'sprint/*'
+#      - 'sprint/*'
       - staging
       - development
   pull_request:

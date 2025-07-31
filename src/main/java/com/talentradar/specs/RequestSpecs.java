@@ -33,7 +33,6 @@ public class RequestSpecs {
 
     return new RequestSpecBuilder()
       .addRequestSpecification(defaultSpec())
-      .addHeader("Authorization", "Bearer " + token)
       .addCookie(signedCookie)
       .build();
   }

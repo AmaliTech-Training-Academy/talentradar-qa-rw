@@ -1,6 +1,7 @@
 target/
 tmp/
 .allure/
+allure-results/
 screenshots/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/

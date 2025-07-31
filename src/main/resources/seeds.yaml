@@ -1,0 +1,83 @@
+users:
+  # Active admin
+  - id: ${ADMIN_ID}
+    email: ${ADMIN_EMAIL}
+    name: Admin User
+    username: admin
+    password: ${ANY_USER_HASHED_PASS}
+    role: ${ADMIN_ROLE_ID}
+    status: ACTIVE
+  # Second active admin
+  - id: ${ADMIN2_ID}
+    email: ${ADMIN2_EMAIL}
+    name: Admin II User
+    username: admin2
+    password: ${ANY_USER_HASHED_PASS}
+    role: ${ADMIN_ROLE_ID}
+    status: ACTIVE
+  # Inactive admin
+  - id: ${INACTIVE_ADMIN_ID}
+    email: ${INACTIVE_ADMIN_EMAIL}
+    name: Inactive Admin
+    username: inactive_admin
+    password: ${ANY_USER_HASHED_PASS}
+    role: ${ADMIN_ROLE_ID}
+    status: INACTIVE
+
+  # Active manager
+  - id: ${MANAGER_ID}
+    email: ${MANAGER_EMAIL}
+    name: Manager User
+    username: manager
+    password: ${ANY_USER_HASHED_PASS}
+    role: ${MANAGER_ROLE_ID}
+    status: ACTIVE
+  # Second active manager
+  - id: ${MANAGER2_ID}
+    email: ${MANAGER2_EMAIL}
+    name: Manager II User
+    username: manager2
+    password: ${ANY_USER_HASHED_PASS}
+    role: ${MANAGER_ROLE_ID}
+    status: ACTIVE
+  # Inactive manager
+  - id: ${INACTIVE_MANAGER_ID}
+    email: ${INACTIVE_MANAGER_EMAIL}
+    name: Inactive Manager
+    username: inactive_manager
+    password: ${ANY_USER_HASHED_PASS}
+    role: ${MANAGER_ROLE_ID}
+    status: INACTIVE
+
+  # Active developer
+  - id: ${DEVELOPER_ID}
+    email: ${DEVELOPER_EMAIL}
+    name: Developer User
+    username: developer
+    password: ${ANY_USER_HASHED_PASS}
+    role: ${DEVELOPER_ROLE_ID}
+    status: ACTIVE
+  # Second active developer
+  - id: ${DEVELOPER2_ID}
+    email: ${DEVELOPER2_EMAIL}
+    name: Developer II User
+    username: developer2
+    password: ${ANY_USER_HASHED_PASS}
+    role: ${DEVELOPER_ROLE_ID}
+    status: ACTIVE
+  # Inactive developer
+  - id: ${INACTIVE_DEVELOPER_ID}
+    email: ${INACTIVE_DEVELOPER_EMAIL}
+    name: Inactive Developer
+    username: inactive_developer
+    password: ${ANY_USER_HASHED_PASS}
+    role: ${DEVELOPER_ROLE_ID}
+    status: INACTIVE
+
+roles:
+  - id: ${ADMIN_ROLE_ID}
+    name: ADMIN
+  - id: ${MANAGER_ROLE_ID}
+    name: MANAGER
+  - id: ${DEVELOPER_ROLE_ID}
+    name: DEVELOPER

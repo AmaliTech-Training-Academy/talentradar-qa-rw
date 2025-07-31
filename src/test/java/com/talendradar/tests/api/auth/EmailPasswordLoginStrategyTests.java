@@ -1,40 +1,39 @@
 package com.talendradar.tests.api.auth;
 
-import com.talendradar.data.pojo.api.login.ApiLoginExpectedPojo;
-import com.talendradar.data.providers.api.LoginDataProvider;
+import com.talendradar.providers.api.AuthDataProvider;
 import com.talentradar.api.AuthApi;
+import com.talentradar.dto.ApiExpectedResponseDto;
+import com.talentradar.dto.ApiRequestDto;
 import io.qameta.allure.Description;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import org.testng.annotations.Test;
 
-import java.util.Map;
-
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 
 public class EmailPasswordLoginStrategyTests extends AuthBaseTest {
 
-  @Test(dataProvider = "success", dataProviderClass = LoginDataProvider.class)
+  @Test(dataProvider = "login-success", dataProviderClass = AuthDataProvider.class)
   @Severity(SeverityLevel.BLOCKER)
   @Description("Verify {desc} can log in successfully with valid credentials")
-  public void verifyUserCanLoginSuccessfully(String desc,
-                                             Map<String, Object> credentials,
-                                             ApiLoginExpectedPojo expected) {
-    AuthApi.authenticateUser(credentials, expected.status())
+  void verifySuccessfulLogin(String desc, ApiRequestDto request, ApiExpectedResponseDto expected) {
+    AuthApi.authenticateUser(request.asLogin(), expected.getStatus())
       .then()
-      .body(matchesJsonSchemaInClasspath(expected.schema()))
-      .body("data.user.role", equalTo(expected.role()));
+      .cookie("token", not(nullValue()))
+      .header("Authorization", nullValue())
+      .body(matchesJsonSchemaInClasspath(expected.getSchema()))
+      .body("data.user.role", equalTo(expected.getRole()));
   }
 
-  @Test(dataProvider = "unauthorized", dataProviderClass = LoginDataProvider.class)
+  @Test(dataProvider = "login-failure", dataProviderClass = AuthDataProvider.class)
   @Severity(SeverityLevel.BLOCKER)
   @Description("Verify login fails with {desc}")
-  public void verifyLoginFailsWithInvalidCredentials(String desc,
-                                                     Map<String, Object> credentials,
-                                                     ApiLoginExpectedPojo expected) {
-    AuthApi.authenticateUser(credentials, expected.status())
+  void verifyLoginFailures(String desc,  ApiRequestDto request, ApiExpectedResponseDto expected) {
+    AuthApi.authenticateUser(request.asLogin(), expected.getStatus())
       .then()
-      .body(matchesJsonSchemaInClasspath(expected.schema()));
+      .cookie("token", nullValue())
+      .header("Authorization", nullValue())
+      .body(matchesJsonSchemaInClasspath(expected.getSchema()));
   }
 }

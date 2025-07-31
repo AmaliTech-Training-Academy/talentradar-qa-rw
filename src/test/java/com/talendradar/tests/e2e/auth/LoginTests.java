@@ -1,15 +1,15 @@
 package com.talendradar.tests.e2e.auth;
 
 import com.microsoft.playwright.Page;
-import com.talendradar.data.pojo.e2e.login.CredentialsPojo;
-import com.talendradar.data.providers.e2e.LoginDataProvider;
+import com.talendradar.providers.e2e.AuthDataProvider;
 import com.talendradar.tests.e2e.BaseE2ETest;
+import com.talentradar.dto.auth.E2eCredentialsDto;
 import com.talentradar.pages.LoginPage;
-import com.talentradar.utils.spy.NetworkRequestSpy;
+import com.talentradar.util.spy.NetworkRequestSpy;
 import io.qameta.allure.*;
 import io.qameta.allure.testng.Tag;
-import org.testng.annotations.*;
 import org.testng.Assert;
+import org.testng.annotations.*;
 
 import java.util.Set;
 
@@ -23,10 +23,10 @@ public class LoginTests extends BaseE2ETest {
     page = new LoginPage(getPage());
   }
 
-  @Test(dataProvider = "success", dataProviderClass = LoginDataProvider.class)
+  @Test(dataProvider = "login-success", dataProviderClass = AuthDataProvider.class)
   @Severity(SeverityLevel.BLOCKER)
   @Description("Verify {role} can login")
-  public void verifyUserCanLogin(String role, CredentialsPojo credentials) {
+  public void verifyUserCanLogin(String role, E2eCredentialsDto credentials) {
     Assert.assertTrue(page.isReady());
     Assert.assertTrue(page
       .login(credentials.email(), credentials.password(), role)
@@ -34,21 +34,21 @@ public class LoginTests extends BaseE2ETest {
     );
   }
 
-  @Test(dataProvider = "unauthorized", dataProviderClass = LoginDataProvider.class)
+  @Test(dataProvider = "login-failure", dataProviderClass = AuthDataProvider.class)
   @Severity(SeverityLevel.BLOCKER)
   @Description("Verify login fails with {desc}")
   public void verifyLoginIsUnauthorizedGivenInvalidCredentials(String desc,
-                                                               CredentialsPojo credentials,
+                                                               E2eCredentialsDto credentials,
                                                                String expectedMessage) {
     Assert.assertTrue(page.isReady());
     page.login(credentials.email(), credentials.password(), "developer");
     Assert.assertTrue(page.waitForText("p", expectedMessage));
   }
 
-  @Test(dataProvider = "validation", dataProviderClass = LoginDataProvider.class)
+  @Test(dataProvider = "login-validation", dataProviderClass = AuthDataProvider.class)
   @Severity(SeverityLevel.BLOCKER)
   @Description("Verify immediate validation given {desc}")
-  public void verifyUIValidationReliability(String desc, CredentialsPojo credentials, String expectedMessage) {
+  public void verifyUIValidationReliability(String desc, E2eCredentialsDto credentials, String expectedMessage) {
     Assert.assertTrue(page.isReady());
 
     Set<String> requests = NetworkRequestSpy.spy(getPage(), () ->
@@ -63,11 +63,11 @@ public class LoginTests extends BaseE2ETest {
     page.waitForValidationError(expectedMessage);
   }
 
-  @Test(dataProvider = "xss", dataProviderClass = LoginDataProvider.class)
+  @Test(dataProvider = "login-xss", dataProviderClass = AuthDataProvider.class)
   @Severity(SeverityLevel.BLOCKER)
   @Tag("Security")
   @Description("Verify password field is not susceptible to xss attacks")
-  public void verifyPasswordIsNotSusceptibleToXSSAttacks(String desc, CredentialsPojo credentials, String value) {
+  public void verifyPasswordIsNotSusceptibleToXSSAttacks(String desc, E2eCredentialsDto credentials, String value) {
     Assert.assertTrue(page.isReady());
 
     Page playwrightPage = getPage();

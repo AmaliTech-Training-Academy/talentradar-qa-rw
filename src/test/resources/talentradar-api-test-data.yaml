@@ -1,500 +1,445 @@
-login:
-  success:
-    - description: "admin"
-      payload:
-        email: "admin@talentradar.ai"
-        password: "AdminPass456"
-      expected:
-        status: 200
-        role: ADMIN
-        schema: "schemas/auth/loggedIn.json"
-    - description: "manager"
-      payload:
-        email: "manager@talentradar.ai"
-        password: "ManagerPass456"
-      expected:
-        status: 200
-        role: MANAGER
-        schema: "schemas/auth/loggedIn.json"
-    - description: "developer"
-      payload:
-        email: "developer@talentradar.ai"
-        password: "DeveloperPass456"
-      expected:
-        status: 200
-        role: DEVELOPER
-        schema: "schemas/auth/loggedIn.json"
-  unauthorized:
-    - description: "Wrong password"
-      payload:
-        email: "admin@talentradar.ai"
-        password: "WrongPass"
+roleBasedProtected:
+  admin:
+    - request:
+        role: manager
       expected:
         status: 401
-        role: ""
-        schema: "schemas/auth/unauthorized.json"
-    - description: "Wrong email"
-      payload:
-        email: "developer@talentradar"
-        password: "DeveloperPass456"
+        schema: schemas/common/accessDenied.json
+    - request:
+        role: developer
       expected:
         status: 401
-        role: ""
-        schema: "schemas/auth/unauthorized.json"
+        schema: schemas/common/accessDenied.json
+  manager:
+    - request:
+        role: admin
+      expected:
+        status: 401
+        schema: schemas/common/accessDenied.json
+    - request:
+        role: developer
+      expected:
+        status: 401
+        schema: schemas/common/accessDenied.json
+  developer:
+    - request:
+        role: manager
+      expected:
+        status: 401
+        schema: schemas/common/accessDenied.json
+    - request:
+        role: admin
+      expected:
+        status: 401
+        schema: schemas/common/accessDenied.json
 
-users:
-  allOnlyAdmin:
-    - role: manager
-      expected:
-        status: 401
-        schema: "schemas/common/accessDenied.json"
-    - role: developer
-      expected:
-        status: 401
-        schema: "schemas/common/accessDenied.json"
-  currentUser:
-    - role: developer
-      expected:
-        status: 200
-        role: DEVELOPER
-        schema: "schemas/users/currentUser.json"
-    - role: manager
-      expected:
-        status: 200
-        role: MANAGER
-        schema: "schemas/users/currentUser.json"
-    - role: admin
+authForInactiveOrDeletedUser:
+  - claims:
+      id: dd18d554-1d34-4798-9265-97e91b645abe
+      email: already_deleted_user_email@example.com
+      name: Already Deleted User
+      role: ADMIN
+    expected:
+      status: 401
+      schema: schemas/auth/unauthorized.json
+  - claims:
+      id: ${INACTIVE_ADMIN_ID}
+      email: ${INACTIVE_ADMIN_EMAIL}
+      name: Inactive Admin
+      role: ADMIN
+    expected:
+      status: 401
+      schema: schemas/auth/unauthorized.json
+  - claims:
+      id: ${INACTIVE_MANAGER_ID}
+      email: ${INACTIVE_MANAGER_EMAIL}
+      name: Inactive Manager
+      role: MANAGER
+    expected:
+      status: 401
+      schema: schemas/auth/unauthorized.json
+  - claims:
+      id: ${INACTIVE_DEVELOPER_ID}
+      email: ${INACTIVE_DEVELOPER_EMAIL}
+      name: Inactive Developer
+      role: DEVELOPER
+    expected:
+      status: 401
+      schema: schemas/auth/unauthorized.json
+
+login:
+  succeeded:
+    - desc: admin
+      request:
+        email: ${ADMIN_EMAIL}
+        password: ${ANY_USER_PASS}
       expected:
         status: 200
         role: ADMIN
-        schema: "schemas/users/currentUser.json"
+        schema: schemas/auth/loggedIn.json
+    - desc: manager
+      request:
+        email: ${MANAGER_EMAIL}
+        password: ${ANY_USER_PASS}
+      expected:
+        status: 200
+        role: MANAGER
+        schema: schemas/auth/loggedIn.json
+    - desc: developer
+      request:
+        email: ${DEVELOPER_EMAIL}
+        password: ${ANY_USER_PASS}
+      expected:
+        status: 200
+        role: DEVELOPER
+        schema: schemas/auth/loggedIn.json
+  failed:
+    - desc: inactive admin user
+      request:
+        email: ${INACTIVE_ADMIN_EMAIL}
+        password: ${ANY_USER_PASS}
+      expected:
+        status: 401
+        schema: schemas/auth/unauthorized.json
+    - desc: inactive manager user
+      request:
+        email: ${INACTIVE_MANAGER_EMAIL}
+        password: ${ANY_USER_PASS}
+      expected:
+        status: 401
+        schema: schemas/auth/unauthorized.json
+    - desc: inactive developer user
+      request:
+        email: ${INACTIVE_DEVELOPER_EMAIL}
+        password: ${ANY_USER_PASS}
+      expected:
+        status: 401
+        schema: schemas/auth/unauthorized.json
+    - desc: wrong password
+      request:
+        email: ${ADMIN2_EMAIL}
+        password: WrongPass
+      expected:
+        status: 401
+        schema: schemas/auth/unauthorized.json
+    - desc: wrong email
+      request:
+        email: developer@talentradar
+        password: ${ANY_USER_PASS}
+      expected:
+        status: 401
+        schema: schemas/auth/unauthorized.json
 
 registration:
-  success:
-    invite:
-      - roleId: ${DEVELOPER_ROLE_ID}
-        expected:
-          status: 201
-          schema: "schemas/users/registration/userCreated.json"
-      - roleId: ${MANAGER_ROLE_ID}
-        expected:
-          status: 201
-          schema: "schemas/users/registration/userCreated.json"
-      - roleId: ${ADMIN_ROLE_ID}
-        expected:
-          status: 201
-          schema: "schemas/users/registration/userCreated.json"
-    completeRegistration:
-      invite:
-        roleId: ${MANAGER_ROLE_ID}
-        expected:
-          status: 201
-          schema: "schemas/users/registration/userCreated.json"
-      payload:
-        fullName: TestUser14 Manager
-        password: ${ANY_USER_PASS}
-        confirmPassword: ${ANY_USER_PASS}
-      expected:
-        status: 200
-        schema: "schemas/users/registration/registrationComplete.json"
-  unsuccessful:
-    onlyAdmin:
-      - role: manager
-        roleId: ${DEVELOPER_ROLE_ID}
-        expected:
-          status: 401
-          schema: "schemas/users/registration/unauthorizedToCreateUser.json"
-      - role: developer
-        roleId: ${MANAGER_ROLE_ID}
-        expected:
-          status: 401
-          schema: "schemas/users/registration/unauthorizedToCreateUser.json"
-    invalidFields:
-      - description: "invalid email"
-        newUser:
-          email: "testuser17@example"
+  succeeded:
+    sendInvite:
+      - request:
           roleId: ${DEVELOPER_ROLE_ID}
         expected:
-          status: 400
-          schema: "schemas/users/registration/unprocessable.json"
-      - description: "wrong role"
-        newUser:
-          email: "testuser17@example.com"
-          roleId: "wrong role id 3215"
+          status: 201
+          role: DEVELOPER
+          schema: schemas/users/registration/userCreated.json
+      - request:
+          roleId: ${MANAGER_ROLE_ID}
         expected:
-          status: 400
-          schema: "schemas/users/registration/unprocessable.json"
-      - description: "email is missing"
-        newUser:
+          status: 201
+          role: MANAGER
+          schema: schemas/users/registration/userCreated.json
+      - request:
+          roleId: ${ADMIN_ROLE_ID}
+        expected:
+          status: 201
+          role: ADMIN
+          schema: schemas/users/registration/userCreated.json
+    acceptInvite:
+      - sendInvite:
+          request:
+            roleId: ${ADMIN_ROLE_ID}
+          expected:
+            status: 201
+            role: ADMIN
+            schema: schemas/users/registration/userCreated.json
+        request:
+          fullName: TestUser Admin
+          password: ${ANY_USER_PASS}
+          confirmPassword: ${ANY_USER_PASS}
+        expected:
+          status: 200
+          schema: schemas/users/registration/registrationComplete.json
+      - sendInvite:
+          request:
+            roleId: ${MANAGER_ROLE_ID}
+          expected:
+            status: 201
+            role: MANAGER
+            schema: schemas/users/registration/userCreated.json
+        request:
+          fullName: TestUser Manager
+          password: ${ANY_USER_PASS}
+          confirmPassword: ${ANY_USER_PASS}
+        expected:
+          status: 200
+          schema: schemas/users/registration/registrationComplete.json
+      - sendInvite:
+          request:
+            roleId: ${DEVELOPER_ROLE_ID}
+          expected:
+            status: 201
+            role: DEVELOPER
+            schema: schemas/users/registration/userCreated.json
+        request:
+          fullName: TestUser Developer
+          password: ${ANY_USER_PASS}
+          confirmPassword: ${ANY_USER_PASS}
+        expected:
+          status: 200
+          schema: schemas/users/registration/registrationComplete.json
+  failed:
+    alreadyChangedUser:
+      - desc: already confirmed admin
+        claims:
+          id: ${ADMIN2_ID}
+          email: ${ADMIN2_EMAIL}
+          roleId: ${ADMIN_ROLE_ID}
+        request:
+          fullName: Already confirmed TestAdmin
+          password: ${ANY_USER_PASS}
+          confirmPassword: ${ANY_USER_PASS}
+        expected:
+          status: 403
+          schema: schemas/users/registration/invalidInvite.json
+      - desc: already confirmed manager
+        claims:
+          id: ${MANAGER2_ID}
+          email: ${MANAGER2_EMAIL}
+          roleId: ${MANAGER_ROLE_ID}
+        request:
+          fullName: Already confirmed TestManager
+          password: ${ANY_USER_PASS}
+          confirmPassword: ${ANY_USER_PASS}
+        expected:
+          status: 403
+          schema: schemas/users/registration/invalidInvite.json
+      - desc: already confirmed developer
+        claims:
+          id: ${DEVELOPER2_ID}
+          email: ${DEVELOPER2_EMAIL}
           roleId: ${DEVELOPER_ROLE_ID}
+        request:
+          fullName: Already confirmed TestDeveloper
+          password: ${ANY_USER_PASS}
+          confirmPassword: ${ANY_USER_PASS}
         expected:
-          status: 400
-          schema: "schemas/users/registration/unprocessable.json"
-      - description: "role is missing"
-        newUser:
-          email: "testuser17@example.com"
+          status: 403
+          schema: schemas/users/registration/invalidInvite.json
+      - desc: already deleted user
+        claims:
+          id: 3626e000-ba11-11dc-3409-b21b07263409
+          email: deleted_user_email@example.com
+          roleId: ${DEVELOPER_ROLE_ID}
+        request:
+          fullName: Deleted TestUser
+          password: ${ANY_USER_PASS}
+          confirmPassword: ${ANY_USER_PASS}
         expected:
-          status: 400
-          schema: "schemas/users/registration/unprocessable.json"
-
-roles:
-  onlyAdminCanQueryAllRoles:
-    - role: manager
-      expected:
-        status: 401
-        schema: "schemas/roles/unauthorized.json"
-    - role: developer
-      expected:
-        status: 401
-        schema: "schemas/roles/unauthorized.json"
-
-sessions:
-  unauthorized:
-    - role: manager
-      expected:
-        status: 401
-        schema: "schemas/admin/sessions/unauthorized.json"
-    - role: developer
-      expected:
-        status: 401
-        schema: "schemas/admin/sessions/unauthorized.json"
-
-selfAssessment:
-  create:
-    payload:
-      dimensions:
-        TechnicalExcellence: 1
-        CommunicationCollaboration: 2
-        TeamDynamicsLeadership: 3
-        ExecutionResults: 4
-        GrowthInnovation: 5
-      reflection: "Focused on growing leadership."
-      status: "SUBMITTED"
-    expected:
-      status: 201
-      schema: "schemas/assessment/createSelfAssessmentSuccess.json"
-
-  update:
-    - create:
-        payload:
-          dimensions:
-            TechnicalExcellence: 1
-            CommunicationCollaboration: 2
-            TeamDynamicsLeadership: 3
-            ExecutionResults: 4
-            GrowthInnovation: 5
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
+          status: 403
+          schema: schemas/users/registration/invalidInvite.json
+      - desc: user registered with developer role but later changed to managerial
+        claims:
+          id: ${INACTIVE_MANAGER_ID}
+          email: ${INACTIVE_MANAGER_EMAIL}
+          roleId: ${DEVELOPER_ROLE_ID}
+        request:
+          fullName: RegisteredAsDeveloper UpgradedToManagerial
+          password: ${ANY_USER_PASS}
+          confirmPassword: ${ANY_USER_PASS}
         expected:
-          status: 201
-          schema: "schemas/assessment/createSelfAssessmentSuccess.json"
-      payload:
-        dimensions:
-          TechnicalExcellence: 4
-          CommunicationCollaboration: 3
-          TeamDynamicsLeadership: 5
-        status: "DRAFT"
+          status: 403
+          schema: schemas/users/registration/invalidInvite.json
+    validation:
+      sendInvite:
+        - desc: email already exists
+          request:
+            email: ${DEVELOPER2_EMAIL}
+            roleId: ${DEVELOPER_ROLE_ID}
+          expected:
+            status: 403
+            schema: schemas/users/registration/unprocessable.json
+        - desc: email already exists
+          request:
+            email: ${INACTIVE_DEVELOPER_EMAIL}
+            roleId: ${DEVELOPER_ROLE_ID}
+          expected:
+            status: 403
+            schema: schemas/users/registration/unprocessable.json
+        - desc: invalid email
+          request:
+            email: testuser17@example
+            roleId: ${DEVELOPER_ROLE_ID}
+          expected:
+            status: 400
+            schema: schemas/users/registration/unprocessable.json
+        - desc: invalid roleId
+          request:
+            email: testuser17@example.com
+            roleId: wrong-role-id-3215
+          expected:
+            status: 400
+            schema: schemas/users/registration/unprocessable.json
+        - desc: missing field - email
+          request:
+            roleId: ${DEVELOPER_ROLE_ID}
+          expected:
+            status: 400
+            schema: schemas/users/registration/unprocessable.json
+        - desc: missing field - roleId
+          request:
+            email: testuser17@example.com
+          expected:
+            status: 400
+            schema: schemas/users/registration/unprocessable.json
+      acceptInvite:
+        - desc: missing field - fullName
+          sendInvite:
+            request:
+              roleId: ${DEVELOPER_ROLE_ID}
+            expected:
+              status: 201
+              schema: schemas/users/registration/userCreated.json
+          request:
+            password: ${ANY_USER_PASS}
+            confirmPassword: ${ANY_USER_PASS}
+          expected:
+            status: 400
+            schema: schemas/users/registration/unprocessable.json
+        - desc: missing field - password
+          sendInvite:
+            request:
+              roleId: ${DEVELOPER_ROLE_ID}
+            expected:
+              status: 201
+              schema: schemas/users/registration/userCreated.json
+          request:
+            fullName: testUser WithNoPass
+            confirmPassword: ${ANY_USER_PASS}
+          expected:
+            status: 400
+            schema: schemas/users/registration/unprocessable.json
+        - desc: missing field - confirmPassword
+          sendInvite:
+            request:
+              roleId: ${DEVELOPER_ROLE_ID}
+            expected:
+              status: 201
+              schema: schemas/users/registration/userCreated.json
+          request:
+            fullName: User WithoutConfirmPass
+            password: ${ANY_USER_PASS}
+          expected:
+            status: 400
+            schema: schemas/users/registration/unprocessable.json
+        - desc: invalid password - mismatch confirmPassword
+          sendInvite:
+            request:
+              roleId: ${DEVELOPER_ROLE_ID}
+            expected:
+              status: 201
+              schema: schemas/users/registration/userCreated.json
+          request:
+            fullName: User WithMismatchedPass
+            password: ${ANY_USER_PASS}
+            confirmPassword: mismatched-passwords
+          expected:
+            status: 400
+            schema: schemas/users/registration/unprocessable.json
+        - desc: invalid fullName - non-alpha chars
+          sendInvite:
+            request:
+              roleId: ${DEVELOPER_ROLE_ID}
+            expected:
+              status: 201
+              schema: schemas/users/registration/userCreated.json
+          request:
+            fullName: User @ James
+            password: ${ANY_USER_PASS}
+            confirmPassword: ${ANY_USER_PASS}
+          expected:
+            status: 400
+            schema: schemas/users/registration/unprocessable.json
+        - desc: invalid fullName - empty
+          sendInvite:
+            request:
+              roleId: ${DEVELOPER_ROLE_ID}
+            expected:
+              status: 201
+              schema: schemas/users/registration/userCreated.json
+          request:
+            fullName: ""
+            password: ${ANY_USER_PASS}
+            confirmPassword: ${ANY_USER_PASS}
+          expected:
+            status: 400
+            schema: schemas/users/registration/unprocessable.json
+        - desc: invalid password - short (< 8 chars)
+          sendInvite:
+            request:
+              roleId: ${DEVELOPER_ROLE_ID}
+            expected:
+              status: 201
+              schema: schemas/users/registration/userCreated.json
+          request:
+            fullName: Example TestUser
+            password: u8
+            confirmPassword: u8
+          expected:
+            status: 400
+            schema: schemas/users/registration/unprocessable.json
+        - desc: invalid password - too long (> 24 chars)
+          sendInvite:
+            request:
+              roleId: ${DEVELOPER_ROLE_ID}
+            expected:
+              status: 201
+              schema: schemas/users/registration/userCreated.json
+          request:
+            fullName: Example TestUser
+            password: u8A_jsoaeiowauldskjafoewiuriwoalkfsht392738284dsfaksjdyou
+            confirmPassword: u8A_jsoaeiowauldskjafoewiuriwoalkfsht392738284dsfaksjdyou
+          expected:
+            status: 400
+            schema: schemas/users/registration/unprocessable.json
+      expiredInvite:
+        - sendInvite:
+            request:
+              roleId: ${DEVELOPER_ROLE_ID}
+            expected:
+              status: 201
+              schema: schemas/users/registration/userCreated.json
+          request:
+            fullName: Anonymous TestUser
+            password: ${ANY_USER_PASS}
+            confirmPassword: ${ANY_USER_PASS}
+          expected:
+            status: 400
+            schema: schemas/users/registration/expiredInvite.json
+
+users:
+  currentUser:
+    - request:
+        role: developer
       expected:
         status: 200
-        schema: "schemas/assessment/updateSelfAssessmentSuccess.json"
-    - create:
-        payload:
-          dimensions:
-            TechnicalExcellence: 1
-            CommunicationCollaboration: 2
-            TeamDynamicsLeadership: 3
-            ExecutionResults: 4
-            GrowthInnovation: 5
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 201
-          schema: "schemas/assessment/createSelfAssessmentSuccess.json"
-      payload:
-        dimensions:
-          ExecutionResults: 4
-          GrowthInnovation: 3
-        reflection: "Updated reflection goals"
-        status: "SUBMITTED"
+        role: DEVELOPER
+        schema: schemas/users/currentUser.json
+    - request:
+        role: manager
       expected:
         status: 200
-        schema: "schemas/assessment/updateSelfAssessmentSuccess.json"
-
-  alreadyComplete:
-    create:
-      payload:
-        dimensions:
-          TechnicalExcellence: 1
-          CommunicationCollaboration: 2
-          TeamDynamicsLeadership: 3
-          ExecutionResults: 4
-          GrowthInnovation: 5
-        reflection: "Focused on growing leadership."
-        status: "SUBMITTED"
+        role: MANAGER
+        schema: schemas/users/currentUser.json
+    - request:
+        role: admin
       expected:
-        status: 201
-        schema: "schemas/assessment/createSelfAssessmentSuccess.json"
-    payload:
-      status: "DRAFT"
-      reflection: "Attempt to update a complete assessment"
-    expected:
-      status: 409
-      schema: "schemas/assessment/statusConflict.json"
-
-  leakCreate:
-    payload:
-      dimensions:
-        TechnicalExcellence: 1
-        CommunicationCollaboration: 2
-        TeamDynamicsLeadership: 3
-        ExecutionResults: 4
-        GrowthInnovation: 5
-      reflection: "Focused on growing leadership."
-      status: "DRAFT"
-    expected:
-      status: 403
-      schema: "schemas/assessment/assessmentResponseError.json"
-
-  unprocessable:
-    create:
-      - description: missing dimension
-        payload:
-          dimensions:
-            CommunicationCollaboration: 2
-            TeamDynamicsLeadership: 3
-            ExecutionResults: 4
-            GrowthInnovation: 5
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: missing dimension
-        payload:
-          dimensions:
-            TechnicalExcellence: 1
-            TeamDynamicsLeadership: 3
-            ExecutionResults: 4
-            GrowthInnovation: 5
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: missing dimension
-        payload:
-          dimensions:
-            TechnicalExcellence: 1
-            CommunicationCollaboration: 2
-            ExecutionResults: 4
-            GrowthInnovation: 5
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: missing dimension
-        payload:
-          dimensions:
-            TechnicalExcellence: 1
-            CommunicationCollaboration: 2
-            TeamDynamicsLeadership: 3
-            GrowthInnovation: 5
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: missing dimension
-        payload:
-          dimensions:
-            TechnicalExcellence: 1
-            CommunicationCollaboration: 2
-            TeamDynamicsLeadership: 3
-            ExecutionResults: 4
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: missing reflection
-        payload:
-          dimensions:
-            TechnicalExcellence: 1
-            CommunicationCollaboration: 2
-            TeamDynamicsLeadership: 3
-            ExecutionResults: 4
-            GrowthInnovation: 5
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: missing status
-        payload:
-          dimensions:
-            TechnicalExcellence: 1
-            CommunicationCollaboration: 2
-            TeamDynamicsLeadership: 3
-            ExecutionResults: 4
-            GrowthInnovation: 5
-          reflection: "Focused on growing leadership."
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: wrong status
-        payload:
-          dimensions:
-            TechnicalExcellence: 1
-            CommunicationCollaboration: 2
-            TeamDynamicsLeadership: 3
-            ExecutionResults: 4
-            GrowthInnovation: 5
-          reflection: "Focused on growing leadership."
-          status: "CREATED"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: invalid status
-        payload:
-          dimensions:
-            TechnicalExcellence: 1
-            CommunicationCollaboration: 2
-            TeamDynamicsLeadership: 3
-            ExecutionResults: 4
-            GrowthInnovation: 5
-          reflection: "Focused on growing leadership."
-          status: 7
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: invalid dimension rate
-        payload:
-          dimensions:
-            TechnicalExcellence: 7
-            CommunicationCollaboration: 3
-            TeamDynamicsLeadership: 5
-            ExecutionResults: 2
-            GrowthInnovation: 2
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: invalid dimension rate
-        payload:
-          dimensions:
-            TechnicalExcellence: 4
-            CommunicationCollaboration: 6
-            TeamDynamicsLeadership: 5
-            ExecutionResults: 2
-            GrowthInnovation: 1
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: invalid dimension rate
-        payload:
-          dimensions:
-            TechnicalExcellence: 4
-            CommunicationCollaboration: 3
-            TeamDynamicsLeadership: 7
-            ExecutionResults: 2
-            GrowthInnovation: 3
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: invalid dimension rate
-        payload:
-          dimensions:
-            TechnicalExcellence: 4
-            CommunicationCollaboration: 3
-            TeamDynamicsLeadership: 3
-            ExecutionResults: 0
-            GrowthInnovation: 3
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: invalid dimension rate
-        payload:
-          dimensions:
-            TechnicalExcellence: 4
-            CommunicationCollaboration: 3
-            TeamDynamicsLeadership: 4
-            ExecutionResults: 2
-            GrowthInnovation: 0
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: invalid dimension rate
-        payload:
-          dimensions:
-            TechnicalExcellence: "y"
-            CommunicationCollaboration: 3
-            TeamDynamicsLeadership: 4
-            ExecutionResults: 2
-            GrowthInnovation: 0
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: invalid dimension rate
-        payload:
-          dimensions:
-            TechnicalExcellence: 3
-            CommunicationCollaboration: "e"
-            TeamDynamicsLeadership: 4
-            ExecutionResults: 2
-            GrowthInnovation: 0
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: invalid dimension rate
-        payload:
-          dimensions:
-            TechnicalExcellence: 3
-            CommunicationCollaboration: 3
-            TeamDynamicsLeadership: "g"
-            ExecutionResults: 2
-            GrowthInnovation: 0
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: invalid dimension rate
-        payload:
-          dimensions:
-            TechnicalExcellence: 3
-            CommunicationCollaboration: 3
-            TeamDynamicsLeadership: 4
-            ExecutionResults: "t"
-            GrowthInnovation: 0
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
-      - description: invalid dimension rate
-        payload:
-          dimensions:
-            TechnicalExcellence: 3
-            CommunicationCollaboration: 3
-            TeamDynamicsLeadership: 4
-            ExecutionResults: 2
-            GrowthInnovation: "r"
-          reflection: "Focused on growing leadership."
-          status: "DRAFT"
-        expected:
-          status: 400
-          schema: "schemas/assessment/assessmentResponseError.json"
+        status: 200
+        role: ADMIN
+        schema: schemas/users/currentUser.json

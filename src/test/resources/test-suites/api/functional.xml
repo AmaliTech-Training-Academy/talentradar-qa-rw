@@ -31,8 +31,8 @@
 
   <test name="Registration Module">
     <classes>
-      <class name="com.talendradar.tests.api.users.registration.RegisterUserTests"/>
-      <class name="com.talendradar.tests.api.users.registration.CompleteRegistrationTests"/>
+      <class name="com.talendradar.tests.api.registration.SendInviteTests"/>
+      <class name="com.talendradar.tests.api.registration.AcceptInviteTests"/>
     </classes>
   </test>
 
@@ -45,8 +45,8 @@
 
   <test name="Other Modules">
     <classes>
-      <class name="com.talendradar.tests.api.DimensionTests"/>
-      <class name="com.talendradar.tests.api.roles.GetRolesTests"/>
+      <class name="com.talendradar.tests.api.DimensionsTests"/>
+      <class name="com.talendradar.tests.api.RolesTests"/>
     </classes>
   </test>
 </suite>

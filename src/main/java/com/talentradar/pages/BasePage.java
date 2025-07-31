@@ -1,7 +1,7 @@
 package com.talentradar.pages;
 
 import com.microsoft.playwright.Locator;
-import com.talentradar.utils.SystemLogger;
+import com.talentradar.util.SystemLogger;
 import com.microsoft.playwright.Page;
 import org.slf4j.Logger;
 

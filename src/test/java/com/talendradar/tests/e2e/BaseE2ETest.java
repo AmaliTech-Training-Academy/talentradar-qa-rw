@@ -1,7 +1,7 @@
 package com.talendradar.tests.e2e;
 
 import com.talendradar.tests.BaseTest;
-import com.talentradar.utils.EnvUtil;
+import com.talentradar.util.Envs;
 
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.Browser;
@@ -11,11 +11,13 @@ import com.microsoft.playwright.Page;
 
 import io.qameta.allure.Step;
 import io.qameta.allure.testng.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.testng.ITestResult;
 import org.testng.annotations.*;
 
 @Tag("Project: TalentRadar.ai")
-public class BaseE2ETest extends BaseTest {
+@Slf4j
+public abstract class BaseE2ETest extends BaseTest {
 
   private static final ThreadLocal<Playwright> playwrightThread = new ThreadLocal<>();
   private static final ThreadLocal<Browser> browserThread = new ThreadLocal<>();
@@ -27,7 +29,7 @@ public class BaseE2ETest extends BaseTest {
   @BeforeClass
   @Parameters("browser")
   public void startup(@Optional("chromium") String browserName) {
-    BASE_URI = EnvUtil.getEnv("E2E_BASE_URL");
+    BASE_URI = Envs.E2E_BASE_URL;
 
     Playwright playwright = Playwright.create();
     Browser browser = switch (browserName.toLowerCase()) {
@@ -39,7 +41,7 @@ public class BaseE2ETest extends BaseTest {
     playwrightThread.set(playwright);
     browserThread.set(browser);
 
-    logger.info("Browser [{}] launched once for class", browserName);
+    log.info("Browser [{}] launched once for class", browserName);
   }
 
   @BeforeMethod
@@ -87,7 +89,7 @@ public class BaseE2ETest extends BaseTest {
     browserThread.remove();
     playwrightThread.remove();
 
-    logger.info("Browser and Playwright closed after class");
+    log.info("Browser and Playwright closed after class");
   }
 
   protected Page getPage() {

@@ -15,7 +15,7 @@ login:
         email: ${DEVELOPER_EMAIL}
         password: ${DEVELOPER_PASS}
       expectedMessage: "Login successful"
-  unauthorized:
+  failure:
     - tag: "Wrong password"
       credentials:
         email: "admin@talentradar.ai"
